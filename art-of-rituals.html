@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<title>Art of Rituals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #000000;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --accent: #8cdbe3;
+    --adim: rgba(140,219,227,0.12);
+    --red: #ff5f5f;
+    --text: #f2f2f2;
+    --muted: #555555;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: #000000 !important;
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100svh;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; }
+  input:focus, button:focus { outline: none; }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100svh;
+    padding: 18px 16px 120px;
+    position: relative;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding-top: 6px;
+  }
+  .title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .title span { color: var(--accent); }
+  .reset-btn {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    padding: 6px 10px;
+    transition: color 0.2s;
+  }
+  .reset-btn[data-c="1"] { color: var(--red); font-weight: 600; }
+
+  /* Blocks section */
+  .blocks-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .blocks-section::-webkit-scrollbar { display: none; }
+  .blocks-section:empty { display: none; }
+  .blk-col {
+    flex: 1 1 0;
+    min-width: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .blk-track {
+    position: relative;
+    background: #fff;
+    height: 140px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .blk-track.running { border-color: var(--accent); }
+  .blk-fill {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: var(--accent);
+    transition: height 0.6s ease;
+    height: 0%;
+  }
+  .blk-icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 58%;
+    height: 58%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+  .blk-name {
+    font-size: 10px;
+    margin-top: 6px;
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+  .blk-time {
+    font-size: 9px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* Goal cards */
+  .goals-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 20px;
+    font-size: 14px;
+  }
+  .goal-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: fadeUp 0.35s ease both;
+    transition: border-color 0.2s, opacity 0.2s;
+  }
+  .goal-card.running { border-color: var(--accent); }
+  .goal-card.done { opacity: 0.65; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tap-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    cursor: pointer;
+  }
+  .goal-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: #fff;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .goal-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+  .goal-icon.empty { background: var(--surface2); }
+  .goal-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .goal-name {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .goal-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .goal-meta .elapsed { color: var(--text); }
+  .goal-meta .check { color: var(--accent); margin-left: 6px; }
+  .play-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .running .play-btn { background: var(--accent); color: #000; }
+  .play-btn svg { width: 14px; height: 14px; }
+
+  .action-row {
+    display: flex;
+    border-top: 1px solid var(--border);
+  }
+  .action-btn {
+    flex: 1;
+    padding: 11px 4px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    transition: color 0.2s, background 0.2s;
+  }
+  .action-btn:active { background: var(--surface2); }
+  .action-btn + .action-btn { border-left: 1px solid var(--border); }
+  .action-btn.delete[data-c="1"] { color: var(--red); }
+
+  /* FAB */
+  .fab-row {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, #000 70%, transparent);
+    display: flex;
+    justify-content: center;
+    z-index: 50;
+    pointer-events: none;
+  }
+  .fab {
+    pointer-events: auto;
+    background: var(--accent);
+    color: #000;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 28px;
+    border-radius: 999px;
+    width: 100%;
+    max-width: 448px;
+    transition: transform 0.15s;
+  }
+  .fab:active { transform: scale(0.97); }
+
+  /* Modal */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .overlay.show { display: flex; }
+  .sheet {
+    background: var(--surface);
+    width: 100%;
+    max-width: 480px;
+    border-radius: 22px 22px 0 0;
+    padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
+    max-height: 94svh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+  }
+  .overlay.show .sheet { transform: translateY(0); }
+  .sheet-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .field-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .field { margin-bottom: 18px; }
+
+  .canvas-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  #drawCanvas {
+    background: #fff;
+    border-radius: var(--radius);
+    width: 220px;
+    height: 220px;
+    max-width: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .canvas-tools {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .tool-btn {
+    background: var(--surface2);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+  }
+  .tool-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .stroke-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    align-items: center;
+  }
+  .stroke-dot {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+  }
+  .stroke-dot.active { border-color: var(--accent); }
+  .stroke-dot span {
+    background: var(--text);
+    border-radius: 50%;
+    display: block;
+  }
+
+  .text-input, .num-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+  }
+  .text-input:focus, .num-input:focus { border-color: var(--accent); }
+
+  .preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .preset-btn {
+    flex: 1 0 auto;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 60px;
+  }
+  .preset-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  .save-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+  .save-btn:disabled { opacity: 0.4; }
+  .cancel-btn {
+    width: 100%;
+    background: transparent;
+    color: var(--muted);
+    padding: 10px;
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120%);
+    background: var(--accent);
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 200;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="title">Art of <span>Rituals</span></div>
+    <button class="reset-btn" id="resetAllBtn">Reset</button>
+  </div>
+  <div class="blocks-section" id="blocksSection"></div>
+  <div class="goals-wrap" id="goalsWrap"></div>
+</div>
+
+<div class="fab-row">
+  <button class="fab" id="addBtn">+ Add Ritual</button>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="overlay" id="modalOverlay">
+  <div class="sheet" id="modalSheet">
+    <div class="sheet-title" id="modalTitle">New Ritual</div>
+
+    <div class="field">
+      <div class="field-label">Draw Icon</div>
+      <div class="canvas-wrap">
+        <canvas id="drawCanvas" width="300" height="300"></canvas>
+      </div>
+      <div class="canvas-tools">
+        <button class="tool-btn active" id="drawTool">✏ Draw</button>
+        <button class="tool-btn" id="undoTool">↩ Undo</button>
+        <button class="tool-btn" id="clearTool">✕ Clear</button>
+      </div>
+      <div class="stroke-row" id="strokeRow"></div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Ritual Name</div>
+      <input type="text" class="text-input" id="nameInput" maxlength="40" placeholder="e.g. Read, Meditate, Write" />
+    </div>
+
+    <div class="field">
+      <div class="field-label">Target Duration</div>
+      <div class="preset-row" id="presetRow"></div>
+      <input type="number" class="num-input" id="customMins" placeholder="Custom minutes" min="1" max="1440" />
+    </div>
+
+    <button class="save-btn" id="saveBtn">Save Ritual</button>
+    <button class="cancel-btn" id="cancelBtn">Cancel</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const STORAGE_KEY = 'aor_goals';
+  const STROKE_SIZES = [4, 8, 14, 20];
+  const PRESETS = [
+    { label: '30m', mins: 30 },
+    { label: '1h', mins: 60 },
+    { label: '1.5h', mins: 90 },
+    { label: '2h', mins: 120 },
+    { label: '3h', mins: 180 },
+  ];
+
+  let goals = loadGoals();
+  let ticker = null;
+  let editingId = null;
+  let currentStroke = STROKE_SIZES[1];
+  let undoStack = [];
+  let drawing = false;
+  let lastPt = null;
+  let selectedMins = 60;
+
+  // ---------- Storage ----------
+  function loadGoals() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch(e) { return []; }
+  }
+  function saveGoals() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(goals)); }
+    catch(e) { /* silent: localStorage may be unavailable in some embeds */ }
+  }
+
+  // ---------- Helpers ----------
+  function liveElapsed(g) {
+    if (g.running && g.ts) {
+      return g.sec + Math.floor((Date.now() - g.ts) / 1000);
+    }
+    return g.sec;
+  }
+  function fmtElapsed(sec) {
+    if (sec < 60) return sec + 's';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    if (m < 60) return m + 'm' + (s ? ' ' + s + 's' : '');
+    const h = Math.floor(m / 60);
+    const rm = m % 60;
+    return h + 'h' + (rm ? ' ' + rm + 'm' : '');
+  }
+  function fmtTarget(mins) {
+    if (mins < 60) return mins + 'm';
+    const h = Math.floor(mins / 60);
+    const rm = mins % 60;
+    return rm ? h + 'h ' + rm + 'm' : h + 'h';
+  }
+
+  // ---------- Toast ----------
+  function showToast(){ /* disabled */ }
+
+  // ---------- Render ----------
+  function renderAll() {
+    renderBlocks();
+    renderGoals();
+  }
+
+  function renderBlocks() {
+    const wrap = document.getElementById('blocksSection');
+    wrap.innerHTML = '';
+    if (!goals.length) return;
+    goals.forEach(g => {
+      const elapsed = liveElapsed(g);
+      const targetSec = g.mins * 60;
+      const pct = Math.min(100, (elapsed / targetSec) * 100);
+      const done = elapsed >= targetSec;
+
+      const col = document.createElement('div');
+      col.className = 'blk-col';
+
+      const track = document.createElement('div');
+      track.className = 'blk-track' + (g.running ? ' running' : '');
+      track.dataset.btid = g.id;
+
+      const fill = document.createElement('div');
+      fill.className = 'blk-fill';
+      fill.dataset.bgid = g.id;
+      fill.style.height = pct + '%';
+      track.appendChild(fill);
+
+      if (g.icon) {
+        const img = document.createElement('img');
+        img.className = 'blk-icon';
+        img.src = g.icon;
+        img.alt = '';
+        track.appendChild(img);
+      }
+
+      track.addEventListener('click', () => toggleTimer(g.id));
+      col.appendChild(track);
+
+      const name = document.createElement('div');
+      name.className = 'blk-name';
+      name.textContent = g.name;
+      col.appendChild(name);
+
+      const time = document.createElement('div');
+      time.className = 'blk-time';
+      time.dataset.btime = g.id;
+      time.textContent = fmtElapsed(elapsed) + ' / ' + fmtTarget(g.mins);
+      col.appendChild(time);
+
+      wrap.appendChild(col);
+    });
+  }
+
+  function renderGoals() {
+    const wrap = document.getElementById('goalsWrap');
+    wrap.innerHTML = '';
+    if (!goals.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No rituals yet. Tap + Add Ritual to begin.';
+      wrap.appendChild(empty);
+      return;
+    }
+    goals.forEach((g, i) => {
+      const elapsed = liveElapsed(g);
+      const targetSec = g.mins * 60;
+      const done = elapsed >= targetSec;
+
+      const card = document.createElement('div');
+      card.className = 'goal-card' + (g.running ? ' running' : '') + (done ? ' done' : '');
+      card.style.animationDelay = (i * 40) + 'ms';
+      card.dataset.gid = g.id;
+
+      // Tap row
+      const tapRow = document.createElement('div');
+      tapRow.className = 'tap-row';
+      tapRow.addEventListener('click', () => toggleTimer(g.id));
+
+      const iconBox = document.createElement('div');
+      iconBox.className = 'goal-icon' + (g.icon ? '' : ' empty');
+      if (g.icon) {
+        const img = document.createElement('img');
+        img.src = g.icon;
+        img.alt = '';
+        iconBox.appendChild(img);
+      }
+      tapRow.appendChild(iconBox);
+
+      const info = document.createElement('div');
+      info.className = 'goal-info';
+      const nm = document.createElement('div');
+      nm.className = 'goal-name';
+      nm.textContent = g.name;
+      info.appendChild(nm);
+      const meta = document.createElement('div');
+      meta.className = 'goal-meta';
+      meta.innerHTML = '<span class="elapsed" data-eid="' + g.id + '">' + fmtElapsed(elapsed) + '</span> / ' + fmtTarget(g.mins) + (done ? ' <span class="check">✓</span>' : '');
+      info.appendChild(meta);
+      tapRow.appendChild(info);
+
+      const playBtn = document.createElement('button');
+      playBtn.className = 'play-btn';
+      playBtn.innerHTML = g.running
+        ? '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>';
+      playBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleTimer(g.id); });
+      tapRow.appendChild(playBtn);
+
+      card.appendChild(tapRow);
+
+      // Action row
+      const actionRow = document.createElement('div');
+      actionRow.className = 'action-row';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'action-btn';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', (e) => { e.stopPropagation(); openModal(g.id); });
+      actionRow.appendChild(editBtn);
+
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'action-btn';
+      resetBtn.textContent = 'Reset';
+      resetBtn.addEventListener('click', (e) => { e.stopPropagation(); resetOneGoal(g.id); });
+      actionRow.appendChild(resetBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'action-btn delete';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (delBtn.dataset.c === '1') {
+          deleteGoal(g.id);
+        } else {
+          delBtn.dataset.c = '1';
+          delBtn.textContent = 'Tap again';
+          setTimeout(() => {
+            if (delBtn.dataset.c === '1') {
+              delBtn.dataset.c = '';
+              delBtn.textContent = 'Delete';
+            }
+          }, 2500);
+        }
+      });
+      actionRow.appendChild(delBtn);
+
+      card.appendChild(actionRow);
+      wrap.appendChild(card);
+    });
+  }
+
+  // ---------- Timer ----------
+  function toggleTimer(id) {
+    const tgt = goals.find(g => g.id === id);
+    if (!tgt) return;
+    const now = Date.now();
+
+    // Commit + stop any currently running goal
+    goals.forEach(g => {
+      if (g.running && g.ts) {
+        g.sec = g.sec + Math.floor((now - g.ts) / 1000);
+        g.running = false;
+        g.ts = null;
+      }
+    });
+
+    // If tapping a stopped (now-stopped) goal that wasn't the one we just committed:
+    // we want toggle behavior. Determine: was target running before?
+    const wasRunning = tgt.sec === goals.find(g => g.id === id).sec && !goals.find(g => g.id === id).running;
+    // Simpler: if the tgt is now stopped and elapsed < target, start it. If it was the one running, it's now stopped (toggle off).
+    // We need to detect: was tgt the running one we just stopped?
+    // Easier approach — track pre-state:
+    // Re-implement cleanly below.
+
+    saveGoals();
+    renderAll();
+    startTicker();
+  }
+
+  // Cleaner toggleTimer
+  function toggleTimer(id) {
+    const now = Date.now();
+    const tgt = goals.find(g => g.id === id);
+    if (!tgt) return;
+    const wasRunning = !!tgt.running;
+
+    // Commit + stop all running goals
+    goals.forEach(g => {
+      if (g.running && g.ts) {
+        g.sec = g.sec + Math.floor((now - g.ts) / 1000);
+      }
+      g.running = false;
+      g.ts = null;
+    });
+
+    if (!wasRunning) {
+      // Don't start if already complete
+      const targetSec = tgt.mins * 60;
+      if (tgt.sec < targetSec) {
+        tgt.running = true;
+        tgt.ts = now;
+      }
+    }
+
+    saveGoals();
+    renderAll();
+    startTicker();
+  }
+
+  function startTicker() {
+    if (ticker) return;
+    const anyRunning = goals.some(g => g.running);
+    if (!anyRunning) return;
+    ticker = setInterval(tick, 1000);
+  }
+
+  function tick() {
+    let anyRunning = false;
+    let completedNames = [];
+    goals.forEach(g => {
+      if (!g.running) return;
+      anyRunning = true;
+      const elapsed = liveElapsed(g);
+      const targetSec = g.mins * 60;
+      if (elapsed >= targetSec) {
+        g.sec = targetSec;
+        g.running = false;
+        g.ts = null;
+        completedNames.push(g.name);
+      } else {
+        // Patch DOM in place
+        const eEl = document.querySelector('[data-eid="' + g.id + '"]');
+        if (eEl) eEl.textContent = fmtElapsed(elapsed);
+        const fEl = document.querySelector('[data-bgid="' + g.id + '"]');
+        if (fEl) fEl.style.height = Math.min(100, (elapsed / targetSec) * 100) + '%';
+        const tEl = document.querySelector('[data-btime="' + g.id + '"]');
+        if (tEl) tEl.textContent = fmtElapsed(elapsed) + ' / ' + fmtTarget(g.mins);
+      }
+    });
+
+    if (completedNames.length) {
+      saveGoals();
+      showToast(completedNames[0] + ' complete ✓');
+      renderAll();
+    }
+
+    if (!goals.some(g => g.running)) {
+      clearInterval(ticker);
+      ticker = null;
+      if (completedNames.length) saveGoals();
+    }
+  }
+
+  // ---------- Goal actions ----------
+  function resetOneGoal(id) {
+    const g = goals.find(x => x.id === id);
+    if (!g) return;
+    g.sec = 0;
+    g.running = false;
+    g.ts = null;
+    saveGoals();
+    renderAll();
+  }
+  function deleteGoal(id) {
+    goals = goals.filter(g => g.id !== id);
+    saveGoals();
+    if (ticker && !goals.some(g => g.running)) {
+      clearInterval(ticker); ticker = null;
+    }
+    renderAll();
+  }
+  function resetAllGoals() {
+    goals.forEach(g => { g.sec = 0; g.running = false; g.ts = null; });
+    saveGoals();
+    if (ticker) { clearInterval(ticker); ticker = null; }
+    renderAll();
+    showToast('All rituals reset');
+  }
+
+  // ---------- Reset All button (two-tap) ----------
+  const resetAllBtn = document.getElementById('resetAllBtn');
+  resetAllBtn.addEventListener('click', () => {
+    if (resetAllBtn.dataset.c === '1') {
+      resetAllGoals();
+      resetAllBtn.dataset.c = '';
+      resetAllBtn.textContent = 'Reset';
+    } else {
+      resetAllBtn.dataset.c = '1';
+      resetAllBtn.textContent = 'Sure?';
+      setTimeout(() => {
+        if (resetAllBtn.dataset.c === '1') {
+          resetAllBtn.dataset.c = '';
+          resetAllBtn.textContent = 'Reset';
+        }
+      }, 2500);
+    }
+  });
+
+  // ---------- Modal ----------
+  const overlay = document.getElementById('modalOverlay');
+  const sheet = document.getElementById('modalSheet');
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  const nameInput = document.getElementById('nameInput');
+  const customMins = document.getElementById('customMins');
+
+  function clearCanvas() {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  function pushUndo() {
+    try {
+      undoStack.push(canvas.toDataURL());
+      if (undoStack.length > 40) undoStack.shift();
+    } catch(e) {}
+  }
+  function popUndo() {
+    if (!undoStack.length) { clearCanvas(); return; }
+    const data = undoStack.pop();
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = data;
+  }
+
+  function getPoint(e) {
+    const rect = canvas.getBoundingClientRect();
+    let cx, cy;
+    if (e.touches && e.touches.length) {
+      cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+    } else {
+      cx = e.clientX; cy = e.clientY;
+    }
+    const x = (cx - rect.left) * (canvas.width / rect.width);
+    const y = (cy - rect.top) * (canvas.height / rect.height);
+    return { x, y };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    pushUndo();
+    drawing = true;
+    lastPt = getPoint(e);
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(lastPt.x, lastPt.y, currentStroke / 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  function moveDraw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const pt = getPoint(e);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = currentStroke;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(lastPt.x, lastPt.y);
+    ctx.lineTo(pt.x, pt.y);
+    ctx.stroke();
+    lastPt = pt;
+  }
+  function endDraw(e) {
+    if (!drawing) return;
+    if (e) e.preventDefault();
+    drawing = false;
+    lastPt = null;
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', moveDraw, { passive: false });
+  canvas.addEventListener('touchend', endDraw, { passive: false });
+  canvas.addEventListener('touchcancel', endDraw, { passive: false });
+
+  document.getElementById('undoTool').addEventListener('click', popUndo);
+  document.getElementById('clearTool').addEventListener('click', () => {
+    pushUndo();
+    clearCanvas();
+  });
+
+  // Stroke selector
+  const strokeRow = document.getElementById('strokeRow');
+  STROKE_SIZES.forEach((sz, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'stroke-dot' + (sz === currentStroke ? ' active' : '');
+    btn.dataset.sz = sz;
+    const dot = document.createElement('span');
+    const visSize = Math.max(4, sz * 0.9);
+    dot.style.width = visSize + 'px';
+    dot.style.height = visSize + 'px';
+    btn.appendChild(dot);
+    btn.addEventListener('click', () => {
+      currentStroke = sz;
+      strokeRow.querySelectorAll('.stroke-dot').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    strokeRow.appendChild(btn);
+  });
+
+  // Presets
+  const presetRow = document.getElementById('presetRow');
+  function renderPresets() {
+    presetRow.innerHTML = '';
+    PRESETS.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'preset-btn' + (p.mins === selectedMins && !customMins.value ? ' active' : '');
+      btn.textContent = p.label;
+      btn.addEventListener('click', () => {
+        selectedMins = p.mins;
+        customMins.value = '';
+        renderPresets();
+      });
+      presetRow.appendChild(btn);
+    });
+  }
+  customMins.addEventListener('input', () => {
+    if (customMins.value) {
+      const v = parseInt(customMins.value, 10);
+      if (v > 0) selectedMins = v;
+      presetRow.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    } else {
+      renderPresets();
+    }
+  });
+
+  function openModal(id) {
+    editingId = id || null;
+    undoStack = [];
+    clearCanvas();
+
+    if (id) {
+      const g = goals.find(x => x.id === id);
+      if (g) {
+        document.getElementById('modalTitle').textContent = 'Edit Ritual';
+        nameInput.value = g.name;
+        selectedMins = g.mins;
+        // Check if mins matches a preset
+        const isPreset = PRESETS.some(p => p.mins === g.mins);
+        customMins.value = isPreset ? '' : g.mins;
+        if (g.icon) {
+          const img = new Image();
+          img.onload = () => {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          };
+          img.src = g.icon;
+        }
+      }
+    } else {
+      document.getElementById('modalTitle').textContent = 'New Ritual';
+      nameInput.value = '';
+      selectedMins = 60;
+      customMins.value = '';
+    }
+    renderPresets();
+    overlay.classList.add('show');
+  }
+  function closeModal() {
+    overlay.classList.remove('show');
+    editingId = null;
+  }
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.getElementById('addBtn').addEventListener('click', () => openModal(null));
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    if (!name) { showToast('Add a name'); return; }
+    let mins = selectedMins;
+    if (customMins.value) {
+      const v = parseInt(customMins.value, 10);
+      if (v > 0) mins = v;
+    }
+    if (!mins || mins <= 0) { showToast('Set a duration'); return; }
+
+    let icon = '';
+    try { icon = canvas.toDataURL('image/jpeg', 0.5); } catch(e) {}
+
+    if (editingId) {
+      const g = goals.find(x => x.id === editingId);
+      if (g) {
+        g.name = name;
+        g.mins = mins;
+        g.icon = icon;
+      }
+    } else {
+      goals.push({
+        id: 'g' + Date.now(),
+        name: name,
+        icon: icon,
+        mins: mins,
+        sec: 0,
+        running: false,
+        ts: null,
+      });
+    }
+    saveGoals();
+    closeModal();
+    renderAll();
+  });
+
+  // ---------- Init ----------
+  clearCanvas();
+  // Resume any running goals (in case page reloaded mid-run)
+  renderAll();
+  if (goals.some(g => g.running)) startTicker();
+
+  // Visibility: re-render block heights when tab regains focus
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      // Trigger one tick to refresh
+      if (goals.some(g => g.running)) {
+        tick();
+        startTicker();
+      } else {
+        renderAll();
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
